@@ -7,18 +7,20 @@ include(CMakeDependentOption)
 
 project(citra)
 
+option(ENABLE_SDL1 "Enable the SDL1 frontend" ON)
+
 # Set bundled sdl2/qt as dependent options.
 # OFF by default, but if ENABLE_SDL2 and MSVC are true then ON
-option(ENABLE_SDL2 "Enable the SDL2 frontend" ON)
+option(ENABLE_SDL2 "Enable the SDL2 frontend" OFF)
 CMAKE_DEPENDENT_OPTION(CITRA_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "ENABLE_SDL2;MSVC" OFF)
 
-option(ENABLE_QT "Enable the Qt frontend" ON)
+option(ENABLE_QT "Enable the Qt frontend" OFF)
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
 CMAKE_DEPENDENT_OPTION(CITRA_USE_BUNDLED_QT "Download bundled Qt binaries" ON "ENABLE_QT;MSVC" OFF)
 
-option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
+option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" OFF)
 
-option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
+option(ENABLE_CUBEB "Enables the cubeb audio backend" OFF)
 
 option(ENABLE_FFMPEG "Enable FFmpeg decoder/encoder" OFF)
 
@@ -197,6 +199,18 @@ endif()
 # Prefer the -pthread flag on Linux.
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+
+if (ENABLE_SDL1)
+    find_package(SDL REQUIRED)
+
+    if (SDL_FOUND)
+        add_library(SDL INTERFACE)
+        target_link_libraries(SDL INTERFACE "${SDL_LIBRARY}")
+        target_include_directories(SDL INTERFACE "${SDL_INCLUDE_DIR}")
+    endif()
+else()
+    set(SDL_FOUND NO)
+endif()
 
 if (ENABLE_SDL2)
     if (CITRA_USE_BUNDLED_SDL2)
