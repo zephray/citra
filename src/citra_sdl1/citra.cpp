@@ -23,8 +23,8 @@
 #include <shellapi.h>
 #endif
 
-#include "citra/config.h"
-#include "citra/emu_window/emu_window_sdl1.h"
+#include "citra_sdl1/config.h"
+#include "citra_sdl1/emu_window/emu_window_sdl1.h"
 #include "common/common_paths.h"
 #include "common/detached_tasks.h"
 #include "common/file_util.h"
@@ -337,7 +337,7 @@ int main(int argc, char** argv) {
     // Register frontend applets
     Frontend::RegisterDefaultApplets();
 
-    std::unique_ptr<EmuWindow_SDL2> emu_window{std::make_unique<EmuWindow_SDL2>(fullscreen)};
+    std::unique_ptr<EmuWindow_SDL1> emu_window{std::make_unique<EmuWindow_SDL1>(fullscreen)};
 
     Core::System& system{Core::System::GetInstance()};
 

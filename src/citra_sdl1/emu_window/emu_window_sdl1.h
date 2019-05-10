@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <utility>
+#include <SDL.h>
 #include "core/frontend/emu_window.h"
 
 struct SDL_Window;
@@ -26,6 +27,9 @@ public:
 
     /// Releases the GL context from the caller thread
     void DoneCurrent() override;
+
+    /// Get a buffer
+    void * GetBuffer() override;
 
     /// Whether the window is still open, and a close request hasn't yet been sent
     bool IsOpen() const;
@@ -57,10 +61,6 @@ private:
 
     /// Called when user passes the fullscreen parameter flag
     void Fullscreen();
-
-    /// Called when a configuration change affects the minimal size of the window
-    void OnMinimalClientAreaChangeRequest(
-        const std::pair<unsigned, unsigned>& minimal_size) override;
 
     /// Is the window still open?
     bool is_open = true;

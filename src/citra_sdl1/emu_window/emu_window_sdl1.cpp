@@ -8,8 +8,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <fmt/format.h>
-#include <glad/glad.h>
-#include "citra/emu_window/emu_window_sdl1.h"
+#include "citra_sdl1/emu_window/emu_window_sdl1.h"
 #include "common/logging/log.h"
 #include "common/scm_rev.h"
 #include "core/3ds.h"
@@ -67,8 +66,6 @@ EmuWindow_SDL1::EmuWindow_SDL1(bool fullscreen) {
     InputCommon::Init();
     Network::Init();
 
-    SDL_SetMainReady();
-
     std::string window_title = fmt::format("Citra {} | {}-{}", Common::g_build_fullname,
                                            Common::g_scm_branch, Common::g_scm_desc);
     SDL_WM_SetCaption(window_title.c_str(), NULL);
@@ -97,6 +94,10 @@ EmuWindow_SDL1::~EmuWindow_SDL1() {
     SDL_Quit();
 }
 
+void * EmuWindow_SDL1::GetBuffer() {
+    return (void *)screen->pixels;
+}
+
 void EmuWindow_SDL1::SwapBuffers() {
     SDL_Flip(screen);
 }
@@ -107,25 +108,17 @@ void EmuWindow_SDL1::PollEvents() {
     // SDL_PollEvent returns 0 when there are no more events in the event queue
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
-        case SDL_QUIT:
-            is_open = false;
-            break;
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             OnKeyEvent(static_cast<int>(event.key.keysym.scancode), event.key.state);
             break;
         case SDL_MOUSEMOTION:
-            // ignore if it came from touch
-            if (event.button.which != SDL_TOUCH_MOUSEID)
-                OnMouseMotion(event.motion.x, event.motion.y);
+            OnMouseMotion(event.motion.x, event.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
-            // ignore if it came from touch
-            if (event.button.which != SDL_TOUCH_MOUSEID) {
-                OnMouseButton(event.button.button, event.button.state, event.button.x,
+            OnMouseButton(event.button.button, event.button.state, event.button.x,
                               event.button.y);
-            }
             break;
         case SDL_QUIT:
             is_open = false;
@@ -134,4 +127,12 @@ void EmuWindow_SDL1::PollEvents() {
             break;
         }
     }
+}
+
+void EmuWindow_SDL1::MakeCurrent() {
+
+}
+
+void EmuWindow_SDL1::DoneCurrent() {
+
 }

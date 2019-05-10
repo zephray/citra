@@ -7,8 +7,7 @@
 #include "core/settings.h"
 #include "video_core/pica.h"
 #include "video_core/renderer_base.h"
-#include "video_core/renderer_opengl/gl_vars.h"
-#include "video_core/renderer_opengl/renderer_opengl.h"
+#include "video_core/renderer_sw/renderer_sw.h"
 #include "video_core/video_core.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,9 +36,7 @@ Core::System::ResultStatus Init(Frontend::EmuWindow& emu_window, Memory::MemoryS
     g_memory = &memory;
     Pica::Init();
 
-    OpenGL::GLES = Settings::values.use_gles;
-
-    g_renderer = std::make_unique<OpenGL::RendererOpenGL>(emu_window);
+    g_renderer = std::make_unique<SWONLY::RendererSoftware>(emu_window);
     Core::System::ResultStatus result = g_renderer->Init();
 
     if (result != Core::System::ResultStatus::Success) {

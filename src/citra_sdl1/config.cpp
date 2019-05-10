@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <SDL.h>
 #include <inih/cpp/INIReader.h>
-#include "citra/config.h"
-#include "citra/default_ini.h"
+#include "citra_sdl1/config.h"
+#include "citra_sdl1/default_ini.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "common/param_package.h"
@@ -47,25 +47,25 @@ bool Config::LoadINI(const std::string& default_contents, bool retry) {
 }
 
 static const std::array<int, Settings::NativeButton::NumButtons> default_buttons = {
-    SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_T, SDL_SCANCODE_G,
-    SDL_SCANCODE_F, SDL_SCANCODE_H, SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_M, SDL_SCANCODE_N,
-    SDL_SCANCODE_O, SDL_SCANCODE_P, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_B,
+    SDLK_a, SDLK_s, SDLK_z, SDLK_x, SDLK_t, SDLK_g,
+    SDLK_f, SDLK_h, SDLK_q, SDLK_w, SDLK_m, SDLK_n,
+    SDLK_o, SDLK_p, SDLK_1, SDLK_2, SDLK_b,
 };
 
 static const std::array<std::array<int, 5>, Settings::NativeAnalog::NumAnalogs> default_analogs{{
     {
-        SDL_SCANCODE_UP,
-        SDL_SCANCODE_DOWN,
-        SDL_SCANCODE_LEFT,
-        SDL_SCANCODE_RIGHT,
-        SDL_SCANCODE_D,
+        SDLK_UP,
+        SDLK_DOWN,
+        SDLK_LEFT,
+        SDLK_RIGHT,
+        SDLK_d,
     },
     {
-        SDL_SCANCODE_I,
-        SDL_SCANCODE_K,
-        SDL_SCANCODE_J,
-        SDL_SCANCODE_L,
-        SDL_SCANCODE_D,
+        SDLK_i,
+        SDLK_k,
+        SDLK_j,
+        SDLK_l,
+        SDLK_d,
     },
 }};
 
