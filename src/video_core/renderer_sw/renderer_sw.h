@@ -37,6 +37,10 @@ private:
     // Fills active OpenGL texture with the given RGB color.
     void LoadColor(u8 color_r, u8 color_g, u8 color_b);
 
+    void memcpy_transpose(uint32_t *dst, uint32_t *src,
+        int32_t x_modifier, int32_t y_modifier, uint32_t x_count,
+        uint32_t y_count);
+
     uint32_t *render_buffer;
 };
 

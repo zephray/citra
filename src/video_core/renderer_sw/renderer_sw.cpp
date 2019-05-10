@@ -73,6 +73,20 @@ void RendererSoftware::SwapBuffers() {
     }
 }
 
+void RendererSoftware::memcpy_transpose(uint32_t *dst, uint32_t *src,
+        int32_t x_modifier, int32_t y_modifier, uint32_t x_count,
+        uint32_t y_count) {
+    uint32_t *src_ptr = src;
+    uint32_t *dst_ptr = dst;
+    for (int y = 0; y < x_count; y++) { // X is flipped to Y
+        for (int x = 0; x < y_count; x++) { // Y is flipped to X
+            *dst_ptr ++ = *src_ptr;
+            src_ptr += x_modifier;
+        }
+        src_ptr += y_modifier;
+    }
+}
+
 /**
  * Loads framebuffer from emulated memory into the screen buffer
  */
@@ -110,10 +124,10 @@ void RendererSoftware::LoadFB(const GPU::Regs::FramebufferConfig& framebuffer, b
         UNIMPLEMENTED();
     }
 
-    const u8* framebuffer_data = VideoCore::g_memory->GetPhysicalPointer(framebuffer_addr);
+    uint32_t * framebuffer_data = (uint32_t *)(VideoCore::g_memory->GetPhysicalPointer(framebuffer_addr));
 
     if (!bottom) {
-        memcpy(render_buffer, framebuffer_data, 400*240*4);
+        memcpy_transpose(render_buffer, framebuffer_data, 400, 0-240*400+1, 400, 240);
     }
 
 }
@@ -128,6 +142,8 @@ void RendererSoftware::LoadColor(u8 color_r, u8 color_g, u8 color_b) {
 
 /// Initialize the renderer
 Core::System::ResultStatus RendererSoftware::Init() {
+    RefreshRasterizerSetting();
+
     return Core::System::ResultStatus::Success;
 }
 
