@@ -73,14 +73,23 @@ void RendererSoftware::SwapBuffers() {
     }
 }
 
-void RendererSoftware::memcpy_transpose(uint32_t *dst, uint32_t *src,
+void RendererSoftware::memcpy_transpose(uint32_t *dst, uint8_t *src,
         int32_t x_modifier, int32_t y_modifier, uint32_t x_count,
-        uint32_t y_count) {
-    uint32_t *src_ptr = src;
+        uint32_t y_count, bool rgb565) {
+    uint8_t *src_ptr = src;
+    uint32_t src_color;
     uint32_t *dst_ptr = dst;
     for (int y = 0; y < x_count; y++) { // X is flipped to Y
         for (int x = 0; x < y_count; x++) { // Y is flipped to X
-            *dst_ptr ++ = *src_ptr;
+            if (rgb565) {
+                src_color = (*src_ptr) | (*(src_ptr + 1) << 8);
+                src_color = ((src_color & 0x1F) << 3) | ((src_color & 0x7E0) << 5) | ((src_color & 0xF800) << 8) | 0xFF000000;
+            }
+            else {
+                src_color = (*src_ptr) | (*(src_ptr + 1) << 8) | (*(src_ptr + 2) << 16) | 0xFF000000;
+            }
+
+            *dst_ptr ++ = src_color;
             src_ptr += x_modifier;
         }
         src_ptr += y_modifier;
@@ -113,21 +122,37 @@ void RendererSoftware::LoadFB(const GPU::Regs::FramebufferConfig& framebuffer, b
     // only allows rows to have a memory alignement of 4.
     ASSERT(pixel_stride % 4 == 0);
 
+    uint32_t modifier_multiplier = 4;
+    bool rgb565 = false;
+
     switch (format) {
     case GPU::Regs::PixelFormat::RGBA8:
+        modifier_multiplier = 4;
+        rgb565 = false;
         break;
 
     case GPU::Regs::PixelFormat::RGB8:
+        modifier_multiplier = 3;
+        rgb565 = false;
+        break;
+
+    case GPU::Regs::PixelFormat::RGB565:
+        modifier_multiplier = 2;
+        rgb565 = true;
         break;
 
     default:
         UNIMPLEMENTED();
     }
 
-    uint32_t * framebuffer_data = (uint32_t *)(VideoCore::g_memory->GetPhysicalPointer(framebuffer_addr));
+    uint8_t * framebuffer_data = (VideoCore::g_memory->GetPhysicalPointer(framebuffer_addr));
 
     if (!bottom) {
-        memcpy_transpose(render_buffer, framebuffer_data, 400, 0-240*400+1, 400, 240);
+        memcpy_transpose(render_buffer, framebuffer_data, 240 * modifier_multiplier, (0-240*400+1) * modifier_multiplier, 240, 400, rgb565);
+        //memcpy(render_buffer, framebuffer_data, 400*240*4);
+    }
+    else {
+        memcpy_transpose(render_buffer + 400 * 240, framebuffer_data, 240 * modifier_multiplier, (0-240*320+1) * modifier_multiplier, 240, 320, rgb565);
     }
 
 }
@@ -137,7 +162,7 @@ void RendererSoftware::LoadFB(const GPU::Regs::FramebufferConfig& framebuffer, b
  * be 1x1 but will stretch across whatever it's rendered on.
  */
 void RendererSoftware::LoadColor(u8 color_r, u8 color_g, u8 color_b) {
-
+    LOG_DEBUG(Render_Software, "Setting BG color");
 }
 
 /// Initialize the renderer
